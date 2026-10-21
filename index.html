@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OshiLive Guide - 量産型推し活サポートアプリ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --theme-primary: #f472b6;
+            --theme-primary-dark: #db2777;
+            --theme-bg-gradient: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
+            --theme-soft-bg: #fff5f8;
+            --theme-border: #fbcfe8;
+            --theme-text-color: #9d174d;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background: var(--theme-bg-gradient);
+            background-attachment: fixed;
+            color: #475569;
+        }
+
+        .theme-bg-custom { background-color: var(--theme-primary) !important; }
+        .theme-text-custom { color: var(--theme-primary) !important; }
+        .theme-border-custom { border-color: var(--theme-primary) !important; }
+
+        .ryousan-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--theme-border);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.15);
+        }
+
+        .ryousan-input {
+            background-color: #ffffff;
+            border: 2px solid var(--theme-border);
+            color: #334155;
+            transition: all 0.25s ease;
+            font-weight: 700;
+        }
+        .ryousan-input:focus {
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.2);
+            outline: none;
+        }
+
+        .bottom-nav-item {
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+        .bottom-nav-item.active {
+            color: var(--theme-primary-dark);
+            font-weight: 900;
+            transform: translateY(-2px);
+        }
+
+        button, input, select, textarea {
+            font-size: 15px !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-8 transition-colors duration-300">
+
+    <header class="theme-bg-custom text-white shadow-lg sticky top-0 z-40 transition-colors duration-300">
+        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleSidebar()" class="p-2 rounded-xl hover:bg-white/20 transition focus:outline-none" aria-label="Menu">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-ribbon text-lg"></i>
+                    <div>
+                        <h1 class="text-base md:text-lg font-black tracking-wider leading-none">OshiLive Guide</h1>
+                        <p class="text-[10px] opacity-90 font-bold tracking-widest">量産型推し活ダイアリー</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- ヘッダー右側はシンプルにし、必要に応じてプロフィール設定へ直接遷移可能に -->
+                <button onclick="openProfileModal()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-full font-bold text-xs transition flex items-center space-x-1.5 border border-white/30 backdrop-blur">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>マイコード</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-50 transition-opacity"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 w-72 h-full bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between rounded-r-3xl">
+        <div class="p-6">
+            <div class="flex items-center justify-between border-b border-pink-100 pb-4 mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-heart theme-text-custom"></i>
+                    <span class="font-black text-lg text-slate-800">MENU</span>
+                </div>
+                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <nav class="space-y-2">
+                <button onclick="switchTab('events')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left text-sm font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">
+                    <i class="fa-solid fa-ticket theme-text-custom w-6 text-lg"></i>
+                    <span>参戦予定＆持ち物</span>
+                </button>
+                <button onclick="switchTab('schedule')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left text-sm font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">
+                    <i class="fa-solid fa-calendar-days theme-text-custom w-6 text-lg"></i>
+                    <span>遠征・日程管理</span>
+                </button>
+                <button onclick="switchTab('money')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left text-sm font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">
+                    <i class="fa-solid fa-wallet theme-text-custom w-6 text-lg"></i>
+                    <span>収支・家計簿</span>
+                </button>
+                <button onclick="switchTab('reports')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left text-sm font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">
+                    <i class="fa-solid fa-pen-to-square theme-text-custom w-6 text-lg"></i>
+                    <span>参戦メモ＆レポ</span>
+                </button>
+                <button onclick="switchTab('community')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-left text-sm font-bold text-slate-700 hover:bg-pink-50 hover:text-pink-600 transition">
+                    <i class="fa-solid fa-ranking-star theme-text-custom w-6 text-lg"></i>
+                    <span>参戦ランキング</span>
+                </button>
+            </nav>
+
+            <div class="mt-8 pt-4 border-t border-pink-100 space-y-2">
+                <button onclick="openProfileModal(); toggleSidebar();" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-pink-50/70 border border-pink-200 text-xs font-bold text-slate-700 hover:bg-pink-100 transition">
+                    <span class="flex items-center"><i class="fa-solid fa-user-gear mr-2 theme-text-custom"></i> プロフィール設定</span>
+                    <i class="fa-solid fa-chevron-right text-pink-400 text-xs"></i>
+                </button>
+                <button onclick="openThemeModal(); toggleSidebar();" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-pink-50/70 border border-pink-200 text-xs font-bold text-slate-700 hover:bg-pink-100 transition">
+                    <span class="flex items-center"><i class="fa-solid fa-palette mr-2 theme-text-custom"></i> 推し色テーマ</span>
+                    <span id="menuThemeName" class="text-pink-600 font-extrabold">ピンク</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-5 border-t border-slate-100 bg-slate-50 text-xs text-slate-400 text-center font-bold tracking-wider">
+            OshiLive Guide
+        </div>
+    </aside>
+
+    <main class="max-w-3xl mx-auto px-4 py-5 flex-grow w-full">
+
+        <div id="loginAlert" class="bg-white/90 border-2 border-pink-200 p-4 mb-5 rounded-2xl shadow-sm flex items-center justify-between text-xs sm:text-sm">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-circle-info text-pink-500 text-lg"></i>
+                <p class="text-slate-700 font-bold leading-tight">
+                    ゲストモード利用中。ログインするとデータをクラウド保存できます。
+                </p>
+            </div>
+            <button onclick="loginWithGoogle()" class="theme-bg-custom text-white font-extrabold px-3.5 py-2 rounded-xl whitespace-nowrap ml-2 shadow transition hover:opacity-90">
+                ログイン
+            </button>
+        </div>
+
+        <!-- TAB 1: 参戦予定 ＆ 持ち物 -->
+        <section id="section-events" class="space-y-6">
+            <div class="ryousan-card p-5 sm:p-7">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b border-pink-100">
+                    <h2 class="text-base sm:text-lg font-black text-slate-800 flex items-center">
+                        <i class="fa-solid fa-ticket theme-text-custom mr-2"></i> 参戦予定の登録
+                    </h2>
+                    <span class="text-[11px] bg-pink-100 text-pink-700 px-3 py-1 rounded-full font-bold">New Event</span>
+                </div>
+
+                <form id="eventForm" onsubmit="saveEvent(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1.5">イベント名 / ツアータイトル</label>
+                        <input type="text" id="eventTitle" required placeholder="例: LIVE TOUR 2026 - FINAL -" class="w-full px-4 py-3.5 ryousan-input rounded-2xl text-base">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1.5">開催日</label>
+                        <input type="date" id="eventDate" required class="w-full px-4 py-3.5 ryousan-input rounded-2xl text-base">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1.5">会場名</label>
+                        <input type="text" id="eventVenue" placeholder="例: 横浜アリーナ / 東京ドーム" class="w-full px-4 py-3.5 ryousan-input rounded-2xl text-base">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1.5">座席情報</label>
+                        <input type="text" id="eventSeat" placeholder="例: アリーナ A2ブロック 15番" class="w-full px-4 py-3.5 ryousan-input rounded-2xl text-base">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-black text-slate-700">持ち物チェックリスト</label>
+                            <span class="text-[11px] text-pink-500 font-bold">タップで簡単追加</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2.5">
+                            <button type="button" onclick="addChecklistTag('チケット')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ チケット</button>
+                            <button type="button" onclick="addChecklistTag('ペンライト')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ ペンライト</button>
+                            <button type="button" onclick="addChecklistTag('アクスタ')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ アクスタ</button>
+                            <button type="button" onclick="addChecklistTag('うちわ')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ うちわ</button>
+                            <button type="button" onclick="addChecklistTag('痛バッグ')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ 痛バッグ</button>
+                            <button type="button" onclick="addChecklistTag('モバイルバッテリー')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ モバイルバッテリー</button>
+                            <button type="button" onclick="addChecklistTag('双眼鏡')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-1.5 rounded-full font-extrabold border border-pink-200 transition">+ 双眼鏡</button>
+                        </div>
+                        
+                        <div class="flex space-x-2 mb-2">
+                            <input type="text" id="customItemInput" placeholder="自分で追加したい持ち物" class="flex-grow px-3 py-2 ryousan-input rounded-xl text-xs">
+                            <button type="button" onclick="addCustomItemBtn()" class="theme-bg-custom text-white px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap shadow">追加</button>
+                        </div>
+
+                        <input type="text" id="eventItems" value="チケット, ペンライト, 痛バッグ, うちわ, モバイルバッテリー, 双眼鏡" class="w-full px-4 py-3 ryousan-input rounded-2xl text-sm" placeholder="カンマ区切りで自動生成">
+                    </div>
+
+                    <button type="submit" class="w-full theme-bg-custom text-white font-black py-4 rounded-2xl shadow-lg hover:opacity-95 transition flex items-center justify-center space-x-2 text-base pt-3 mt-4">
+                        <i class="fa-solid fa-heart mr-1"></i>
+                        <span>予定を保存する</span>
+                    </button>
+                </form>
+            </div>
+
+            <div>
+                <h3 class="text-sm sm:text-base font-black text-slate-800 mb-3 flex items-center">
+                    <i class="fa-solid fa-list-check theme-text-custom mr-2"></i> 参戦予定リスト
+                </h3>
+                <div id="eventList" class="space-y-4">
+                    <p class="text-center text-slate-400 py-8 text-sm font-bold">データ読み込み中...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: スケジュール -->
+        <section id="section-schedule" class="hidden space-y-6">
+            <div class="ryousan-card p-5 sm:p-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base sm:text-lg font-black text-slate-800 flex items-center">
+                        <i class="fa-solid fa-clock theme-text-custom mr-2"></i> 遠征・観光タイムスケジュール
+                    </h2>
+                </div>
+                <p class="text-xs text-slate-500 font-bold mb-4">
+                    移動・物販・カフェ巡り・ライブ本番など、日毎のスケジュールを設定できます。
+                </p>
+
+                <form id="scheduleForm" onsubmit="saveScheduleItem(event)" class="space-y-3.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">日程</label>
+                            <select id="schedDay" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm font-bold">
+                                <option value="DAY1 (1日目)">DAY1 (1日目)</option>
+                                <option value="DAY2 (2日目)">DAY2 (2日目)</option>
+                                <option value="DAY3 (3日目)">DAY3 (3日目)</option>
+                                <option value="前日移動・準備">前日移動・準備</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">時間</label>
+                            <input type="time" id="schedTime" required class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">内容 / スポット</label>
+                            <input type="text" id="schedTitle" required placeholder="例: 推し活カフェ / グッズ並び" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-400 block mb-1">クイック入力：</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" onclick="setSchedQuick('09:00', '新幹線・飛行機移動')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-2.5 py-1 rounded-lg border border-pink-200 transition font-bold">移動</button>
+                            <button type="button" onclick="setSchedQuick('10:30', '会場物販購入')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-2.5 py-1 rounded-lg border border-pink-200 transition font-bold">物販</button>
+                            <button type="button" onclick="setSchedQuick('12:30', '推し活カフェ・ランチ')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-2.5 py-1 rounded-lg border border-pink-200 transition font-bold">カフェ・観光</button>
+                            <button type="button" onclick="setSchedQuick('16:00', 'ライブ開場・参戦')" class="text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 px-2.5 py-1 rounded-lg border border-pink-200 transition font-bold">ライブ開場</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1">メモ (任意)</label>
+                        <input type="text" id="schedMemo" placeholder="例: 友達と駅集合" class="w-full px-3.5 py-2.5 ryousan-input rounded-xl text-xs">
+                    </div>
+
+                    <button type="submit" class="w-full theme-bg-custom text-white font-black py-3 rounded-xl shadow transition flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i>
+                        <span>スケジュールに追加</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="scheduleContainer" class="space-y-4">
+                <p class="text-center text-slate-400 py-8 text-sm font-bold">スケジュール読み込み中...</p>
+            </div>
+        </section>
+
+        <!-- TAB 3: 推し活家計簿 -->
+        <section id="section-money" class="hidden space-y-6">
+            <div class="theme-bg-custom text-white p-6 rounded-3xl shadow-lg relative overflow-hidden transition-colors duration-300">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <span class="text-xs text-white/90 font-black tracking-wider">収支サマリー</span>
+                        <div class="text-2xl sm:text-3xl font-black mt-1 tracking-tight" id="totalSpentDisplay">確定 (済): ¥0</div>
+                        <div class="text-sm font-bold text-white/90 mt-0.5" id="totalPlannedDisplay">予定 (未): ¥0</div>
+                    </div>
+                    <button onclick="setBudgetPrompt()" class="bg-white/20 hover:bg-white/30 px-3.5 py-2 rounded-xl text-xs font-bold border border-white/30 transition backdrop-blur">
+                        予算設定
+                    </button>
+                </div>
+
+                <div class="space-y-1.5 pt-2 border-t border-white/20">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span>全体消化率 (確定 + 予定)</span>
+                        <span id="budgetPercentText">0%</span>
+                    </div>
+                    <div class="w-full bg-black/20 h-3 rounded-full overflow-hidden p-0.5">
+                        <div id="budgetProgressBar" class="bg-white h-full rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-white/90 font-bold">
+                        <span id="budgetLimitText">目標予算: ¥50,000</span>
+                        <span id="budgetRemainingText">予算残り: ¥50,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ryousan-card p-5 sm:p-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base sm:text-lg font-black text-slate-800 flex items-center">
+                        <i class="fa-solid fa-pen-to-square theme-text-custom mr-2"></i> 
+                        <span id="expenseFormTitle">収支を記録・変更</span>
+                    </h2>
+                    <button id="cancelExpenseEditBtn" onclick="resetExpenseForm()" class="hidden text-xs text-slate-400 hover:text-slate-600 font-bold">
+                        キャンセル
+                    </button>
+                </div>
+
+                <form id="moneyForm" onsubmit="saveExpense(event)" class="space-y-3.5">
+                    <input type="hidden" id="editingExpenseId" value="">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">区分</label>
+                            <select id="expenseType" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm font-black text-slate-800">
+                                <option value="actual">確定 (支出済)</option>
+                                <option value="planned">予定 (見込み)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">費目・内容</label>
+                            <input type="text" id="expenseName" required placeholder="例: 痛バ用缶バッジ / チケット代" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">金額 (円)</label>
+                            <input type="number" id="expenseAmount" required min="0" placeholder="例: 5000" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">日付 (任意)</label>
+                            <input type="date" id="expenseDate" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-700 mb-1">カテゴリ</label>
+                            <select id="expenseCategory" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm font-bold text-slate-700">
+                                <option value="prepare_goods">事前: 缶バッジ・グッズ</option>
+                                <option value="prepare_beauty">事前: 服・美容院</option>
+                                <option value="prepare_cd">事前: CD・DVD</option>
+                                <option value="ticket">ライブ: チケット代</option>
+                                <option value="venue_goods">ライブ: 会場物販</option>
+                                <option value="travel">遠征: 交通・宿</option>
+                                <option value="other">その他: カフェ・観光</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="expenseSubmitBtn" class="w-full theme-bg-custom text-white font-black py-3 rounded-xl shadow transition flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-check mr-1"></i>
+                        <span>記録を追加する</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="ryousan-card overflow-hidden">
+                <div class="p-3 bg-pink-50/50 border-b border-pink-100 flex justify-between items-center">
+                    <div class="flex space-x-1">
+                        <button onclick="filterExpenses('all')" id="expTab-all" class="px-3 py-1.5 rounded-lg text-xs font-black bg-pink-600 text-white shadow-sm">すべて</button>
+                        <button onclick="filterExpenses('actual')" id="expTab-actual" class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-pink-100/50">確定 (済)</button>
+                        <button onclick="filterExpenses('planned')" id="expTab-planned" class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-pink-100/50">予定 (未)</button>
+                    </div>
+                    <span id="expenseCount" class="text-xs font-bold text-slate-400">0件</span>
+                </div>
+                <div id="expenseList" class="divide-y divide-pink-100">
+                    <p class="text-center text-slate-400 py-8 text-sm font-bold">支出記録はまだありません</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: 参戦メモ＆レポ -->
+        <section id="section-reports" class="hidden space-y-6">
+            <div class="ryousan-card p-5 sm:p-6">
+                <h2 class="text-base sm:text-lg font-black text-slate-800 mb-3 flex items-center">
+                    <i class="fa-solid fa-pen-to-square theme-text-custom mr-2"></i> 参戦レポ＆思い出メモ
+                </h2>
+                <form id="reportForm" onsubmit="saveReport(event)" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1">タイトル・日程</label>
+                        <input type="text" id="reportTitle" required placeholder="例: 2026/05/10 ツアーファイナル横浜" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1">セトリ・MC・感想メモ</label>
+                        <textarea id="reportContent" rows="4" required placeholder="・アンコールでレスもらった&#10;・1曲目の衣装が最高だった&#10;・友達との打ち上げ楽しかった" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-700 mb-1">満足度</label>
+                        <select id="reportRating" class="w-full px-3.5 py-3 ryousan-input rounded-xl text-sm font-bold text-slate-700">
+                            <option value="5">★★★★★ 最高 (神ライブ)</option>
+                            <option value="4">★★★★☆ すごく楽しかった</option>
+                            <option value="3">★★★☆☆ 楽しかった</option>
+                            <option value="2">★★☆☆☆ 普通</option>
+                            <option value="1">★☆☆☆☆ 不完全燃焼</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full theme-bg-custom text-white font-black py-3 rounded-xl shadow transition flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-heart mr-1"></i>
+                        <span>レポを保存する</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="reportList" class="space-y-4"></div>
+        </section>
+
+        <!-- TAB 5: ランキング -->
+        <section id="section-community" class="hidden space-y-6">
+            <div class="theme-bg-custom p-6 rounded-3xl text-white shadow-lg transition-colors duration-300">
+                <h2 class="text-lg sm:text-xl font-black mb-1 flex items-center">
+                    <i class="fa-solid fa-trophy mr-2"></i> 参戦数ランキング ＆ フレンド共有
+                </h2>
+                <p class="text-xs opacity-90 font-bold leading-relaxed">
+                    推しコード（フレンドコード）を教え合って友達と参戦数を共有しよう！
+                </p>
+            </div>
+
+            <!-- 自分の推しコード & 友達追加カード -->
+            <div class="ryousan-card p-5 space-y-4">
+                <div>
+                    <span class="text-xs font-black text-slate-500 block mb-1">あなたの推しコード (フレンドコード)</span>
+                    <div class="flex items-center space-x-2">
+                        <div id="myFriendCodeDisplay" class="flex-grow bg-pink-50 border-2 border-pink-200 px-4 py-2.5 rounded-xl font-black text-slate-800 text-center tracking-widest text-base select-all">
+                            ---- ----
+                        </div>
+                        <button onclick="copyFriendCode()" class="theme-bg-custom text-white font-black px-4 py-2.5 rounded-xl text-xs shadow hover:opacity-90 transition flex items-center space-x-1 whitespace-nowrap">
+                            <i class="fa-solid fa-copy"></i>
+                            <span>コピー</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t border-pink-100 pt-3">
+                    <span class="text-xs font-black text-slate-700 block mb-1.5">友達を推しコードで追加</span>
+                    <form onsubmit="addFriendByCode(event)" class="flex space-x-2">
+                        <input type="text" id="addFriendCodeInput" required placeholder="例: AB12CD34" class="flex-grow px-3.5 py-2.5 ryousan-input rounded-xl text-xs font-bold uppercase">
+                        <button type="submit" class="bg-slate-800 text-white font-black px-4 py-2.5 rounded-xl text-xs shadow hover:bg-slate-700 transition whitespace-nowrap">
+                            追加・登録
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="ryousan-card overflow-hidden">
+                <div class="p-3 bg-pink-50/50 border-b border-pink-100 flex justify-between items-center">
+                    <div class="flex space-x-1">
+                        <button onclick="filterRanking('all')" id="rankTab-all" class="px-3 py-1.5 rounded-lg text-xs font-black bg-pink-600 text-white shadow-sm">全体ランキング</button>
+                        <button onclick="filterRanking('friends')" id="rankTab-friends" class="px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-pink-100/50">友達のみ</button>
+                    </div>
+                </div>
+                <div id="rankingList" class="divide-y divide-pink-100">
+                    <p class="text-center text-slate-400 py-8 text-sm font-bold">ランキング読み込み中...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ボトムナビゲーション -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-pink-200 z-40 px-2 py-2 flex justify-around items-center shadow-lg md:hidden">
+        <button onclick="switchTab('events')" id="bnav-events" class="bottom-nav-item active flex-1 py-1 flex flex-col items-center">
+            <i class="fa-solid fa-ticket text-lg mb-0.5"></i>
+            <span class="text-[10px]">参戦予定</span>
+        </button>
+        <button onclick="switchTab('schedule')" id="bnav-schedule" class="bottom-nav-item flex-1 py-1 flex flex-col items-center">
+            <i class="fa-solid fa-calendar-days text-lg mb-0.5"></i>
+            <span class="text-[10px]">日程</span>
+        </button>
+        <button onclick="switchTab('money')" id="bnav-money" class="bottom-nav-item flex-1 py-1 flex flex-col items-center">
+            <i class="fa-solid fa-wallet text-lg mb-0.5"></i>
+            <span class="text-[10px]">収支</span>
+        </button>
+        <button onclick="switchTab('reports')" id="bnav-reports" class="bottom-nav-item flex-1 py-1 flex flex-col items-center">
+            <i class="fa-solid fa-pen-to-square text-lg mb-0.5"></i>
+            <span class="text-[10px]">メモ</span>
+        </button>
+        <button onclick="switchTab('community')" id="bnav-community" class="bottom-nav-item flex-1 py-1 flex flex-col items-center">
+            <i class="fa-solid fa-ranking-star text-lg mb-0.5"></i>
+            <span class="text-[10px]">順位</span>
+        </button>
+    </nav>
+
+    <!-- プロフィール設定モーダル -->
+    <div id="profileModal" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center space-y-4 border-2 border-pink-200">
+            <div class="flex justify-between items-center border-b border-pink-100 pb-3">
+                <h3 class="font-black text-slate-800 text-base flex items-center"><i class="fa-solid fa-user-gear mr-2 theme-text-custom"></i> マイプロフィール設定</h3>
+                <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">推し活ネーム（表示名）</label>
+                    <input type="text" id="profDisplayName" placeholder="例: ひな" class="w-full px-3 py-2.5 ryousan-input rounded-xl text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-700 mb-1">あなたの推しコード</label>
+                    <div id="modalFriendCode" class="w-full px-3 py-2 bg-pink-50 border border-pink-200 rounded-xl text-xs font-black text-pink-600 text-center tracking-widest select-all">
+                        ---- ----
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="saveProfileSetting()" class="w-full theme-bg-custom text-white font-black py-2.5 rounded-xl text-xs shadow">
+                設定を保存する
+            </button>
+        </div>
+    </div>
+
+    <!-- 推し色カラー切り替えモーダル -->
+    <div id="themeModal" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl text-center space-y-4 border-2 border-pink-200">
+            <div class="flex justify-between items-center border-b border-pink-100 pb-3">
+                <h3 class="font-black text-slate-800 text-base">🎨 推し色を選択</h3>
+                <button onclick="closeThemeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-500 font-bold">アプリ全体のカラーをあなたの推し色に着せ替えます</p>
+            
+            <div class="grid grid-cols-4 gap-3 pt-2">
+                <button onclick="setTheme('pink')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-pink-400 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">ピンク</span>
+                </button>
+                <button onclick="setTheme('red')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-rose-500 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">レッド</span>
+                </button>
+                <button onclick="setTheme('blue')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-sky-400 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">ブルー</span>
+                </button>
+                <button onclick="setTheme('purple')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-purple-500 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">パープル</span>
+                </button>
+                <button onclick="setTheme('yellow')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-amber-400 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">イエロー</span>
+                </button>
+                <button onclick="setTheme('green')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-emerald-400 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">グリーン</span>
+                </button>
+                <button onclick="setTheme('black')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-slate-800 shadow-md border-2 border-white"></span>
+                    <span class="text-[10px] font-black text-slate-600">ブラック</span>
+                </button>
+                <button onclick="setTheme('white')" class="flex flex-col items-center space-y-1">
+                    <span class="w-10 h-10 rounded-full bg-slate-100 shadow-md border-2 border-slate-300"></span>
+                    <span class="text-[10px] font-black text-slate-600">ホワイト</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 汎用確認・通知モーダル -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-3 border-2 border-pink-200">
+            <h3 id="modalTitle" class="text-base font-black text-slate-800">確認</h3>
+            <p id="modalMessage" class="text-xs sm:text-sm text-slate-600 font-bold leading-relaxed"></p>
+            <div class="flex justify-center space-x-2 pt-2">
+                <button id="modalCancelBtn" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">キャンセル</button>
+                <button id="modalConfirmBtn" class="px-5 py-2 theme-bg-custom text-white text-xs font-black rounded-xl transition shadow-md">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript & Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously,
+            signInWithCustomToken,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            setDoc, 
+            addDoc, 
+            getDocs, 
+            updateDoc, 
+            deleteDoc, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // システム環境変数の取得と安全な初期化
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'oshilive-default-app';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let userBudget = 50000;
+        let currentExpenseFilter = 'all';
+        let rawExpenseList = [];
+
+        let myFriendCode = '';
+        let myFriendsList = [];
+        let rankingFilterMode = 'all';
+        let rawRankingData = [];
+
+        // バックエンド・Firebaseの安全な接続セットアップ
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                const authenticateUser = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        console.warn("Firebase認証フォールバック実施:", e);
+                        await signInAnonymously(auth);
+                    }
+                };
+                authenticateUser();
+            }
+        } catch (e) {
+            console.warn("Firestoreに接続できません。インメモリモードで動作します。", e);
+        }
+
+        const categoryMap = {
+            prepare_goods: { label: '事前: 缶バッジ・グッズ' },
+            prepare_beauty: { label: '事前: 服・美容院' },
+            prepare_cd: { label: '事前: CD・DVD' },
+            ticket: { label: 'ライブ: チケット代' },
+            venue_goods: { label: 'ライブ: 会場物販' },
+            travel: { label: '遠征: 交通・宿' },
+            other: { label: 'その他: カフェ・観光' }
+        };
+
+        // 8桁の英数字フレンドコード生成
+        function generateFriendCode(uid) {
+            if (!uid) return 'OSHI1234';
+            let hash = 0;
+            for (let i = 0; i < uid.length; i++) {
+                hash = ((hash << 5) - hash) + uid.charCodeAt(i);
+                hash |= 0;
+            }
+            const code = Math.abs(hash).toString(36).toUpperCase().padStart(6, '0');
+            return 'OS' + code.substring(0, 6);
+        }
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                const loginAlert = document.getElementById('loginAlert');
+
+                if (user) {
+                    if (loginAlert) loginAlert.classList.add('hidden');
+
+                    myFriendCode = generateFriendCode(user.uid);
+                    const codeDisp = document.getElementById('myFriendCodeDisplay');
+                    const modalCode = document.getElementById('modalFriendCode');
+                    if (codeDisp) codeDisp.textContent = myFriendCode;
+                    if (modalCode) modalCode.textContent = myFriendCode;
+
+                    const displayName = user.displayName || `推し活ファン`;
+                    const profInput = document.getElementById('profDisplayName');
+                    if (profInput && !profInput.value) profInput.value = displayName;
+
+                    // 保存されたフレンドリストを取得
+                    const savedFriends = localStorage.getItem(`oshilive_friends_${user.uid}`);
+                    if (savedFriends) {
+                        try { myFriendsList = JSON.parse(savedFriends); } catch(e){}
+                    }
+
+                    loadEvents();
+                    loadSchedule();
+                    loadExpenses();
+                    loadReports();
+                    updateUserPublicCount();
+                } else {
+                    if (loginAlert) loginAlert.classList.remove('hidden');
+                }
+                loadRanking();
+            });
+        }
+
+        window.loginWithGoogle = () => {
+            showModal("ログイン状態", "現在、自動匿名認証により安全にログイン状態が保たれています。すべての登録機能をご利用いただけます。");
+        };
+
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('-translate-x-full');
+            if (overlay) overlay.classList.toggle('hidden');
+        };
+
+        window.switchTab = (tabName) => {
+            const tabs = ['events', 'schedule', 'money', 'reports', 'community'];
+            tabs.forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const bnav = document.getElementById(`bnav-${t}`);
+                if (t === tabName) {
+                    if (sec) sec.classList.remove('hidden');
+                    if (bnav) bnav.classList.add('active');
+                } else {
+                    if (sec) sec.classList.add('hidden');
+                    if (bnav) bnav.classList.remove('active');
+                }
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // --- フレンドコード機能 ---
+        window.copyFriendCode = () => {
+            if (!myFriendCode) return;
+            const tempInput = document.createElement('input');
+            tempInput.value = myFriendCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showModal("コピー完了", `推しコード【 ${myFriendCode} 】をクリップボードにコピーしました！SNSやLINEで共有してください🎀`);
+        };
+
+        window.addFriendByCode = (e) => {
+            e.preventDefault();
+            const input = document.getElementById('addFriendCodeInput');
+            if (!input) return;
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) return;
+            if (code === myFriendCode) {
+                showModal("通知", "自分の推しコードは追加できません。");
+                return;
+            }
+
+            if (myFriendsList.includes(code)) {
+                showModal("通知", "すでに登録されている推しコードです。");
+                return;
+            }
+
+            myFriendsList.push(code);
+            if (currentUser) {
+                localStorage.setItem(`oshilive_friends_${currentUser.uid}`, JSON.stringify(myFriendsList));
+            }
+            input.value = '';
+            showModal("追加成功", `推しコード【 ${code} 】のユーザーをフレンドに追加しました！`);
+            renderRanking();
+        };
+
+        window.filterRanking = (mode) => {
+            rankingFilterMode = mode;
+            ['all', 'friends'].forEach(m => {
+                const btn = document.getElementById(`rankTab-${m}`);
+                if (btn) {
+                    if (m === mode) {
+                        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black bg-pink-600 text-white shadow-sm';
+                    } else {
+                        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-pink-100/50';
+                    }
+                }
+            });
+            renderRanking();
+        };
+
+        window.addChecklistTag = (tag) => {
+            const input = document.getElementById('eventItems');
+            if (!input) return;
+            const current = input.value.trim();
+            if (current.includes(tag)) return;
+            input.value = current ? `${current}, ${tag}` : tag;
+        };
+
+        window.addCustomItemBtn = () => {
+            const customInput = document.getElementById('customItemInput');
+            if (!customInput) return;
+            const val = customInput.value.trim();
+            if (!val) return;
+            window.addChecklistTag(val);
+            customInput.value = '';
+        };
+
+        window.setSchedQuick = (time, title) => {
+            document.getElementById('schedTime').value = time;
+            document.getElementById('schedTitle').value = title;
+        };
+
+        // --- PROFILE & THEME MANAGEMENT ---
+        window.openProfileModal = () => document.getElementById('profileModal').classList.remove('hidden');
+        window.closeProfileModal = () => document.getElementById('profileModal').classList.add('hidden');
+
+        window.saveProfileSetting = async () => {
+            const name = document.getElementById('profDisplayName').value.trim();
+            if (!name) return;
+            
+            if (currentUser) {
+                await updateUserPublicCount();
+            }
+            closeProfileModal();
+            showModal("保存完了", "プロフィールを更新しました。");
+        };
+
+        window.openThemeModal = () => document.getElementById('themeModal').classList.remove('hidden');
+        window.closeThemeModal = () => document.getElementById('themeModal').classList.add('hidden');
+
+        window.setTheme = (themeName) => {
+            const root = document.documentElement;
+            const themeMap = {
+                pink: { primary: '#f472b6', dark: '#db2777', border: '#fbcfe8', label: 'ピンク', bg: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%)' },
+                red: { primary: '#f43f5e', dark: '#e11d48', border: '#fecdd3', label: 'レッド', bg: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fecdd3 100%)' },
+                blue: { primary: '#38bdf8', dark: '#0284c7', border: '#bae6fd', label: 'ブルー', bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%)' },
+                purple: { primary: '#c084fc', dark: '#9333ea', border: '#e9d5ff', label: 'パープル', bg: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #e9d5ff 100%)' },
+                yellow: { primary: '#fbbf24', dark: '#d97706', border: '#fde68a', label: 'イエロー', bg: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)' },
+                green: { primary: '#34d399', dark: '#059669', border: '#a7f3d0', label: 'グリーン', bg: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%)' },
+                black: { primary: '#475569', dark: '#0f172a', border: '#cbd5e1', label: 'ブラック', bg: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)' },
+                white: { primary: '#94a3b8', dark: '#475569', border: '#e2e8f0', label: 'ホワイト', bg: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)' }
+            };
+
+            const selected = themeMap[themeName] || themeMap.pink;
+            root.style.setProperty('--theme-primary', selected.primary);
+            root.style.setProperty('--theme-primary-dark', selected.dark);
+            root.style.setProperty('--theme-border', selected.border);
+            root.style.setProperty('--theme-bg-gradient', selected.bg);
+
+            const menuThemeName = document.getElementById('menuThemeName');
+            if (menuThemeName) menuThemeName.textContent = selected.label;
+            closeThemeModal();
+        };
+
+        window.saveEvent = async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) {
+                showModal("情報", "データ連携が準備中です。少々お待ちください。");
+                return;
+            }
+
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const venue = document.getElementById('eventVenue').value;
+            const seat = document.getElementById('eventSeat').value;
+            const itemsStr = document.getElementById('eventItems').value;
+            const items = itemsStr.split(',').map(s => ({ name: s.trim(), checked: false })).filter(s => s.name);
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'events');
+                await addDoc(colRef, {
+                    title, date, venue, seat, items,
+                    createdAt: new Date().toISOString()
+                });
+                document.getElementById('eventForm').reset();
+                showModal("登録完了", "参戦予定を追加しました✨");
+                updateUserPublicCount();
+            } catch (err) {
+                showModal("エラー", "保存に失敗しました。");
+            }
+        };
+
+        function loadEvents() {
+            if (!currentUser || !db) return;
+            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'events');
+            onSnapshot(colRef, (snapshot) => {
+                const eventList = document.getElementById('eventList');
+                if (!eventList) return;
+                
+                if (snapshot.empty) {
+                    eventList.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">参戦予定はまだありません</p>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.docs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const docId = docSnap.id;
+                    
+                    let itemsHtml = '';
+                    if (data.items && data.items.length) {
+                        data.items.forEach((it, idx) => {
+                            itemsHtml += `
+                                <label class="flex items-center space-x-2 bg-pink-50/70 hover:bg-pink-100/70 p-2 rounded-xl border border-pink-100 text-xs font-bold text-slate-700 cursor-pointer transition">
+                                    <input type="checkbox" ${it.checked ? 'checked' : ''} onchange="toggleItemCheck('${docId}', ${idx})" class="w-4 h-4 accent-pink-500 rounded">
+                                    <span class="${it.checked ? 'line-through text-slate-400' : ''}">${it.name}</span>
+                                </label>
+                            `;
+                        });
+                    }
+
+                    html += `
+                        <div class="ryousan-card p-5 space-y-3">
+                            <div class="flex justify-between items-start border-b border-pink-100 pb-2">
+                                <div>
+                                    <span class="text-[11px] font-black theme-text-custom bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200">${data.date || '日程未定'}</span>
+                                    <h4 class="text-base font-black text-slate-800 mt-1">${data.title}</h4>
+                                </div>
+                                <button onclick="deleteEvent('${docId}')" class="text-slate-300 hover:text-rose-500 transition p-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-bold text-slate-600">
+                                <div><i class="fa-solid fa-location-dot theme-text-custom mr-1.5"></i> ${data.venue || '会場未定'}</div>
+                                <div><i class="fa-solid fa-chair theme-text-custom mr-1.5"></i> ${data.seat || '座席未設定'}</div>
+                            </div>
+
+                            ${data.items && data.items.length ? `
+                                <div class="pt-2">
+                                    <span class="text-[11px] font-black text-slate-500 mb-1.5 block">持ち物チェックリスト</span>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        ${itemsHtml}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                eventList.innerHTML = html;
+            }, (err) => console.error("Event Snapshot error:", err));
+        }
+
+        window.toggleItemCheck = async (eventId, itemIdx) => {
+            if (!currentUser || !db) return;
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'events', eventId);
+            try {
+                const snapshot = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'events'));
+                const targetDoc = snapshot.docs.find(d => d.id === eventId);
+                if (targetDoc) {
+                    const data = targetDoc.data();
+                    if (data.items && data.items[itemIdx]) {
+                        data.items[itemIdx].checked = !data.items[itemIdx].checked;
+                        await updateDoc(docRef, { items: data.items });
+                    }
+                }
+            } catch (e) {}
+        };
+
+        window.deleteEvent = (eventId) => {
+            showModal("確認", "この参戦予定を削除しますか？", async () => {
+                if (!currentUser || !db) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'events', eventId));
+                closeModal();
+                updateUserPublicCount();
+            });
+        };
+
+        window.saveScheduleItem = async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) {
+                showModal("情報", "データ連携が準備中です。");
+                return;
+            }
+
+            const day = document.getElementById('schedDay').value;
+            const time = document.getElementById('schedTime').value;
+            const title = document.getElementById('schedTitle').value;
+            const memo = document.getElementById('schedMemo').value || '';
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules');
+                await addDoc(colRef, { day, time, title, memo, createdAt: new Date().toISOString() });
+                document.getElementById('schedTitle').value = '';
+                document.getElementById('schedMemo').value = '';
+                showModal("追加完了", "スケジュールを追加しました！");
+            } catch (err) {}
+        };
+
+        function loadSchedule() {
+            if (!currentUser || !db) return;
+            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules');
+            onSnapshot(colRef, (snapshot) => {
+                const container = document.getElementById('scheduleContainer');
+                if (!container) return;
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">タイムスケジュールはまだありません</p>';
+                    return;
+                }
+
+                const groups = {};
+                snapshot.docs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const day = data.day || '日程別';
+                    if (!groups[day]) groups[day] = [];
+                    groups[day].push({ id: docSnap.id, ...data });
+                });
+
+                let html = '';
+                Object.keys(groups).forEach(dayName => {
+                    groups[dayName].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+                    html += `
+                        <div class="ryousan-card p-5">
+                            <h3 class="font-black text-slate-800 text-sm border-b border-pink-100 pb-2 mb-3 flex items-center">
+                                <i class="fa-solid fa-calendar-day theme-text-custom mr-2"></i> ${dayName}
+                            </h3>
+                            <div class="space-y-2.5">
+                    `;
+
+                    groups[dayName].forEach(item => {
+                        html += `
+                            <div class="flex items-center justify-between bg-pink-50/50 p-3 rounded-2xl border border-pink-100">
+                                <div class="flex items-center space-x-3">
+                                    <span class="px-2.5 py-1 rounded-xl bg-pink-200/60 theme-text-custom font-black text-xs">${item.time}</span>
+                                    <div>
+                                        <p class="text-xs sm:text-sm font-black text-slate-800">${item.title}</p>
+                                        ${item.memo ? `<p class="text-[10px] text-slate-500 font-bold">${item.memo}</p>` : ''}
+                                    </div>
+                                </div>
+                                <button onclick="deleteScheduleItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }, (err) => console.error("Schedule Snapshot error:", err));
+        }
+
+        window.deleteScheduleItem = (id) => {
+            showModal("確認", "このスケジュールを削除しますか？", async () => {
+                if (!currentUser || !db) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'schedules', id));
+                closeModal();
+            });
+        };
+
+        window.filterExpenses = (filterType) => {
+            currentExpenseFilter = filterType;
+            ['all', 'actual', 'planned'].forEach(t => {
+                const btn = document.getElementById(`expTab-${t}`);
+                if (btn) {
+                    if (t === filterType) {
+                        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black bg-pink-600 text-white shadow-sm';
+                    } else {
+                        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black text-slate-600 hover:bg-pink-100/50';
+                    }
+                }
+            });
+            renderExpenseList();
+        };
+
+        window.saveExpense = async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) {
+                showModal("情報", "データ連携が準備中です。");
+                return;
+            }
+
+            const editId = document.getElementById('editingExpenseId').value;
+            const type = document.getElementById('expenseType').value;
+            const name = document.getElementById('expenseName').value;
+            const amount = parseInt(document.getElementById('expenseAmount').value);
+            const date = document.getElementById('expenseDate').value || '';
+            const category = document.getElementById('expenseCategory').value;
+
+            try {
+                if (editId) {
+                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'expenses', editId);
+                    await updateDoc(docRef, { type, name, amount, date, category });
+                    showModal("更新完了", "支出の記録を修正しました。");
+                } else {
+                    const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'expenses');
+                    await addDoc(colRef, {
+                        type, name, amount, date, category,
+                        createdAt: new Date().toISOString()
+                    });
+                    showModal("登録完了", "支出・予定を追加しました。");
+                }
+
+                resetExpenseForm();
+            } catch (err) {
+                showModal("エラー", "保存に失敗しました。");
+            }
+        };
+
+        window.startEditExpense = (id) => {
+            const item = rawExpenseList.find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('editingExpenseId').value = item.id;
+            document.getElementById('expenseType').value = item.type || 'actual';
+            document.getElementById('expenseName').value = item.name || '';
+            document.getElementById('expenseAmount').value = item.amount || '';
+            document.getElementById('expenseDate').value = item.date || '';
+            document.getElementById('expenseCategory').value = item.category || 'other';
+
+            document.getElementById('expenseFormTitle').textContent = '記録を編集';
+            document.getElementById('expenseSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-1"></i> 変更を保存する';
+            document.getElementById('cancelExpenseEditBtn').classList.remove('hidden');
+
+            window.scrollTo({ top: document.getElementById('moneyForm').offsetTop - 80, behavior: 'smooth' });
+        };
+
+        window.resetExpenseForm = () => {
+            document.getElementById('moneyForm').reset();
+            document.getElementById('editingExpenseId').value = '';
+            document.getElementById('expenseFormTitle').textContent = '収支を記録・変更';
+            document.getElementById('expenseSubmitBtn').innerHTML = '<i class="fa-solid fa-check mr-1"></i> 記録を追加する';
+            document.getElementById('cancelExpenseEditBtn').classList.add('hidden');
+        };
+
+        function loadExpenses() {
+            if (!currentUser || !db) return;
+
+            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'expenses');
+            onSnapshot(colRef, (snapshot) => {
+                rawExpenseList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderExpenseList();
+            }, (err) => console.error("Expense Snapshot error:", err));
+        }
+
+        function renderExpenseList() {
+            const expenseList = document.getElementById('expenseList');
+            if (!expenseList) return;
+            if (rawExpenseList.length === 0) {
+                expenseList.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">支出記録はまだありません</p>';
+                updateMoneySummary(0, 0);
+                return;
+            }
+
+            let actualTotal = 0;
+            let plannedTotal = 0;
+
+            rawExpenseList.forEach(data => {
+                const amt = data.amount || 0;
+                if (data.type === 'actual') actualTotal += amt;
+                else plannedTotal += amt;
+            });
+
+            const filteredDocs = rawExpenseList.filter(data => {
+                if (currentExpenseFilter === 'actual') return data.type === 'actual';
+                if (currentExpenseFilter === 'planned') return data.type === 'planned';
+                return true;
+            });
+
+            if (filteredDocs.length === 0) {
+                expenseList.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">該当する記録はありません</p>';
+            } else {
+                let html = '';
+                filteredDocs.forEach(data => {
+                    const amt = data.amount || 0;
+                    const isActual = data.type === 'actual';
+                    const cat = categoryMap[data.category] || categoryMap.other;
+
+                    html += `
+                        <div class="p-3.5 flex justify-between items-center hover:bg-pink-50/30 transition">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black ${isActual ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                    ${isActual ? '確定 (済)' : '予定 (未)'}
+                                </span>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-black text-slate-800">${data.name}</p>
+                                    <div class="flex items-center space-x-2 text-[10px] font-bold text-slate-400">
+                                        <span>${cat.label}</span>
+                                        ${data.date ? `<span>• ${data.date}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-black text-slate-800">¥${amt.toLocaleString()}</span>
+                                <button onclick="startEditExpense('${data.id}')" class="text-slate-400 hover:text-pink-600 text-xs p-1" title="編集">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteExpense('${data.id}')" class="text-slate-300 hover:text-rose-500 text-xs p-1" title="削除">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                expenseList.innerHTML = html;
+            }
+
+            const countEl = document.getElementById('expenseCount');
+            if (countEl) countEl.textContent = `${filteredDocs.length}件`;
+            updateMoneySummary(actualTotal, plannedTotal);
+        }
+
+        function updateMoneySummary(actual, planned) {
+            const spentEl = document.getElementById('totalSpentDisplay');
+            if (spentEl) spentEl.textContent = `確定 (済): ¥${actual.toLocaleString()}`;
+            const plannedEl = document.getElementById('totalPlannedDisplay');
+            if (plannedEl) plannedEl.textContent = `予定 (未): ¥${planned.toLocaleString()}`;
+            
+            const totalCombine = actual + planned;
+            const limitEl = document.getElementById('budgetLimitText');
+            if (limitEl) limitEl.textContent = `目標予算: ¥${userBudget.toLocaleString()}`;
+            
+            const remaining = userBudget - totalCombine;
+            const remEl = document.getElementById('budgetRemainingText');
+            if (remEl) remEl.textContent = `残予算: ¥${remaining.toLocaleString()}`;
+
+            const percent = Math.min(Math.round((totalCombine / userBudget) * 100), 100);
+            const pctEl = document.getElementById('budgetPercentText');
+            if (pctEl) pctEl.textContent = `${percent}%`;
+            const barEl = document.getElementById('budgetProgressBar');
+            if (barEl) barEl.style.width = `${percent}%`;
+        }
+
+        window.setBudgetPrompt = () => {
+            const input = prompt("目標予算金額を入力してください (数字のみ):", userBudget);
+            if (input && !isNaN(input)) {
+                userBudget = parseInt(input);
+                loadExpenses();
+            }
+        };
+
+        window.deleteExpense = (id) => {
+            showModal("確認", "この記録を削除しますか？", async () => {
+                if (!currentUser || !db) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'expenses', id));
+                closeModal();
+            });
+        };
+
+        window.saveReport = async (e) => {
+            e.preventDefault();
+            if (!currentUser || !db) {
+                showModal("情報", "データ連携が準備中です。");
+                return;
+            }
+
+            const title = document.getElementById('reportTitle').value;
+            const content = document.getElementById('reportContent').value;
+            const rating = document.getElementById('reportRating').value;
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'reports');
+                await addDoc(colRef, { title, content, rating, createdAt: new Date().toISOString() });
+                document.getElementById('reportForm').reset();
+                showModal("記録完了", "参戦レポを保存しました✨");
+            } catch (err) {}
+        };
+
+        function loadReports() {
+            if (!currentUser || !db) return;
+
+            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'reports');
+            onSnapshot(colRef, (snapshot) => {
+                const reportList = document.getElementById('reportList');
+                if (!reportList) return;
+                if (snapshot.empty) {
+                    reportList.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">参戦メモはまだありません。</p>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.docs.forEach(docSnap => {
+                    const data = docSnap.data();
+                    html += `
+                        <div class="ryousan-card p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-black text-slate-800 text-sm sm:text-base">${data.title}</h4>
+                                <button onclick="deleteReport('${docSnap.id}')" class="text-slate-300 hover:text-rose-500">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-700 font-bold whitespace-pre-line leading-relaxed bg-pink-50/50 p-3.5 rounded-2xl border border-pink-100 mb-2">${data.content}</p>
+                        </div>
+                    `;
+                });
+                reportList.innerHTML = html;
+            }, (err) => console.error("Report Snapshot error:", err));
+        }
+
+        window.deleteReport = (id) => {
+            showModal("確認", "このメモを削除しますか？", async () => {
+                if (!currentUser || !db) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'reports', id));
+                closeModal();
+            });
+        };
+
+        async function updateUserPublicCount() {
+            if (!currentUser || !db) return;
+            try {
+                const snapshot = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'events'));
+                const nameEl = document.getElementById('profDisplayName');
+                const displayName = nameEl && nameEl.value ? nameEl.value : `推し活ファン`;
+                
+                const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rankings', currentUser.uid);
+                await setDoc(publicDocRef, {
+                    userName: displayName,
+                    friendCode: myFriendCode,
+                    eventCount: snapshot.size,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {}
+        }
+
+        function loadRanking() {
+            if (!db) {
+                const rankingList = document.getElementById('rankingList');
+                if (rankingList) rankingList.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm font-bold">データ共有準備中...</p>';
+                return;
+            }
+
+            const publicColRef = collection(db, 'artifacts', appId, 'public', 'data', 'rankings');
+            onSnapshot(publicColRef, (snapshot) => {
+                rawRankingData = snapshot.docs.map(d => ({ uid: d.id, ...d.data() }));
+                renderRanking();
+            }, (err) => console.error("Ranking Snapshot error:", err));
+        }
+
+        function renderRanking() {
+            const rankingList = document.getElementById('rankingList');
+            if (!rankingList) return;
+
+            let users = [...rawRankingData];
+
+            if (rankingFilterMode === 'friends') {
+                users = users.filter(u => myFriendsList.includes(u.friendCode) || u.friendCode === myFriendCode);
+            }
+
+            if (users.length === 0) {
+                rankingList.innerHTML = `<p class="text-center text-slate-400 py-8 text-sm font-bold">${rankingFilterMode === 'friends' ? '登録された友達はいません。推しコードを追加してください！' : 'データがありません。'}</p>`;
+                return;
+            }
+
+            users.sort((a, b) => (b.eventCount || 0) - (a.eventCount || 0));
+
+            let html = '';
+            users.forEach((u, index) => {
+                let badgeClass = 'bg-slate-100 text-slate-600';
+                if (index === 0) badgeClass = 'bg-amber-400 text-white font-black';
+                if (index === 1) badgeClass = 'bg-slate-300 text-slate-800 font-black';
+                if (index === 2) badgeClass = 'bg-amber-600 text-white font-black';
+
+                const isMe = currentUser && u.uid === currentUser.uid;
+
+                html += `
+                    <div class="p-4 flex items-center justify-between ${isMe ? 'bg-pink-100/40' : 'hover:bg-pink-50/30'} transition">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-7 h-7 rounded-full ${badgeClass} flex items-center justify-center text-xs">
+                                ${index + 1}
+                            </span>
+                            <div>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-xs sm:text-sm font-black text-slate-800">${u.userName || '推し活ファン'}</span>
+                                    ${isMe ? '<span class="text-[9px] bg-pink-500 text-white px-1.5 py-0.5 rounded-full font-bold">あなた</span>' : ''}
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-bold block">コード: ${u.friendCode || '----'}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-black theme-text-custom">${u.eventCount || 0}</span>
+                            <span class="text-[10px] text-slate-400 font-bold">参戦</span>
+                        </div>
+                    </div>
+                `;
+            });
+            rankingList.innerHTML = html;
+        }
+
+        window.showModal = (title, message, onConfirm = null) => {
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            if (modalTitle) modalTitle.textContent = title;
+            if (modalMessage) modalMessage.textContent = message;
+            
+            const cancelBtn = document.getElementById('modalCancelBtn');
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+
+            if (onConfirm) {
+                if (cancelBtn) cancelBtn.classList.remove('hidden');
+                if (confirmBtn) confirmBtn.onclick = onConfirm;
+            } else {
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+                if (confirmBtn) confirmBtn.onclick = closeModal;
+            }
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) modalOverlay.classList.remove('hidden');
+        };
+
+        window.closeModal = () => {
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) modalOverlay.classList.add('hidden');
+        };
+    </script>
+</body>
+</html>
